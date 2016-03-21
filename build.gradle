@@ -1,0 +1,34 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+mainClassName = 'camera_surveillance.Surveillance'
+
+repositories {		
+	mavenCentral()
+	maven { url "https://github.com/rosjava/rosjava_mvn_repo/raw/master/" }
+	maven { url "https://jitpack.io" }
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configurations.all {    
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+dependencies {	
+	// RHEA
+	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'  
+ 	compile 'com.github.rhea-flow:ros-eval:-SNAPSHOT'
+
+ 	// rosjava
+	compile 'org.ros.rosjava_messages:sensor_msgs:1.11.7'
+
+ 	// OpenCV
+	compile 'nu.pattern:opencv:2.4.9-5'  
+	compile files('./Imshow.jar')
+
+	compile 'org.apache.commons:commons-lang3:3.0'
+}
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.3'
+}
