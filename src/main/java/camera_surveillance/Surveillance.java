@@ -7,34 +7,24 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.reactive_ros.ReactiveTopic;
-import org.reactive_ros.streams.Stream;
-import org.reactive_ros.streams.messages.Topic;
 
-import org.reactive_ros.util.functions.Func2;
-import org.ros.namespace.GraphName;
-import org.ros.node.AbstractNodeMain;
-import org.ros.node.ConnectedNode;
+import org.rhea_core.Stream;
+import org.rhea_core.distribution.Distributor;
+import org.rhea_core.util.functions.Func2;
+import ros_eval.RosTopic;
 import sensor_msgs.Image;
 
 import java.util.concurrent.TimeUnit;
 
-public class Surveillance extends AbstractNodeMain {
-    private static final Topic CAMERA = new Topic("/camera/rgb/image_color", Image._TYPE);
-
-    private final Imshow window = new Imshow("Live Feed");
-
+public class Surveillance {
+    private static final RosTopic<Image> CAMERA = new RosTopic<>("/camera/rgb/image_color");
+    private static final Imshow window = new Imshow("Live Feed");
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
-    @Override
-    public GraphName getDefaultNodeName() { return GraphName.of("surveillance"); }
+    public static void main(String[] args) {
 
-    @Override
-    public void onStart(ConnectedNode connectedNode) {
-        ReactiveTopic reactiveTopic = new ReactiveTopic(connectedNode);
-        Stream.setReactiveTopic(reactiveTopic);
+        Stream.configure(new Distributor());
 
-        // Camera Image topic
         Stream<Mat> image = Stream.<Image>from(CAMERA).flatMap(im -> {
             try {
                 return Stream.just(CvImage.toCvCopy(im).image);
