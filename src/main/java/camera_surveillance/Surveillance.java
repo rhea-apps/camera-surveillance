@@ -2,6 +2,7 @@ package camera_surveillance;
 
 import com.atul.JavaOpenCV.Imshow;
 import cv_bridge.CvImage;
+import hazelcast_distribution.HazelcastDistributionStrategy;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -9,21 +10,26 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import org.rhea_core.Stream;
-import org.rhea_core.distribution.Distributor;
 import org.rhea_core.util.functions.Func2;
+import ros_eval.RosEvaluationStrategy;
 import ros_eval.RosTopic;
+import rx_eval.RxjavaEvaluationStrategy;
 import sensor_msgs.Image;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class Surveillance {
-    private static final RosTopic<Image> CAMERA = new RosTopic<>("/camera/rgb/image_color");
-    private static final Imshow window = new Imshow("Live Feed");
+    static final RosTopic<Image> CAMERA = new RosTopic<>("/camera/rgb/image_color");
+    static final Imshow window = new Imshow("Live Feed");
     static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
 
     public static void main(String[] args) {
 
-        Stream.configure(new Distributor());
+        Stream.configure(new HazelcastDistributionStrategy(Arrays.asList(
+                RxjavaEvaluationStrategy::new,
+                () -> new RosEvaluationStrategy(new RxjavaEvaluationStrategy(), "localhost", "myros_client")
+        )));
 
         Stream<Mat> image = Stream.<Image>from(CAMERA).flatMap(im -> {
             try {

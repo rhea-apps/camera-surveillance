@@ -20,7 +20,8 @@ dependencies {
 	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'  
  	compile 'com.github.rhea-flow:ros-eval:-SNAPSHOT'
  	compile 'com.github.rhea-flow:rx-eval:-SNAPSHOT'
- 	compile 'com.github.rhea-apps:cv-bridge:-SNAPSHOT'
+ 	compile 'com.github.rhea-flow:cv-bridge:-SNAPSHOT'
+	compile 'com.github.rhea-flow:hazelcast-distribution:-SNAPSHOT'
 
  	// rosjava
 	compile 'org.ros.rosjava_messages:sensor_msgs:1.11.7'
