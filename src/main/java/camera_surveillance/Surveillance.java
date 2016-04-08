@@ -1,6 +1,10 @@
 package camera_surveillance;
 
 import com.atul.JavaOpenCV.Imshow;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MemberAttributeConfig;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 import cv_bridge.CvImage;
 import hazelcast_distribution.HazelcastDistributionStrategy;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -10,6 +14,7 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import org.rhea_core.Stream;
+import org.rhea_core.network.Machine;
 import org.rhea_core.util.functions.Func2;
 import ros_eval.RosEvaluationStrategy;
 import ros_eval.RosTopic;
@@ -17,16 +22,39 @@ import rx_eval.RxjavaEvaluationStrategy;
 import sensor_msgs.Image;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class Surveillance {
     static final RosTopic<Image> CAMERA = new RosTopic<>("/camera/rgb/image_color");
-    static final Imshow window = new Imshow("Live Feed");
-    static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+    /*static { System.loadLibrary(Core.NATIVE_LIBRARY_NAME); }
+    static final Imshow window = new Imshow("Live Feed");*/
 
     public static void main(String[] args) {
 
-        Stream.configure(new HazelcastDistributionStrategy(Arrays.asList(
+        Config config = new Config();
+        MemberAttributeConfig memberConfig = new MemberAttributeConfig();
+        memberConfig.setIntAttribute("cores", 4);
+        memberConfig.setBooleanAttribute("ros", true);
+        memberConfig.setBooleanAttribute("Ros", true);
+        memberConfig.setStringAttribute("hostname", "localhost");
+        memberConfig.setStringAttribute("ip", "128.1.1.68");
+        config.setMemberAttributeConfig(memberConfig);
+        HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
+
+        Stream.configure(new HazelcastDistributionStrategy(
+                hazelcast,
+                Collections.singletonList(new MyMachine()),
+                Arrays.asList(
+                    RxjavaEvaluationStrategy::new,
+                    () -> new RosEvaluationStrategy(new RxjavaEvaluationStrategy(), "localhost", "myros_client")
+                )
+        ));
+
+        Stream.from(CAMERA).subscribe(im -> System.out.println("Image!"));
+
+        /*Stream.configure(new HazelcastDistributionStrategy(Arrays.asList(
                 RxjavaEvaluationStrategy::new,
                 () -> new RosEvaluationStrategy(new RxjavaEvaluationStrategy(), "localhost", "myros_client")
         )));
@@ -49,7 +77,7 @@ public class Surveillance {
                         window::showImage,
                         e -> window.Window.setVisible(false),
                         () -> window.Window.setVisible(false)
-                );
+                );*/
     }
 
     private static boolean containsHuman(MutablePair<Mat,Mat> pair) {
@@ -64,5 +92,12 @@ public class Surveillance {
                 if (sum > 50) return true;
             }
         return false;
-    }   
+    }
+
+    private static class MyMachine implements Machine {
+        @Override
+        public int cores() {
+            return 4;
+        }
+    }
 }

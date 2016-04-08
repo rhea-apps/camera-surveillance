@@ -1,4 +1,3 @@
-apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'application'
 mainClassName = 'camera_surveillance.Surveillance'
@@ -17,7 +16,7 @@ configurations.all {
 }
 dependencies {	
 	// RHEA
-	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'  
+	compile 'com.github.rhea-flow:rhea-core:-SNAPSHOT'
  	compile 'com.github.rhea-flow:ros-eval:-SNAPSHOT'
  	compile 'com.github.rhea-flow:rx-eval:-SNAPSHOT'
  	compile 'com.github.rhea-flow:cv-bridge:-SNAPSHOT'
@@ -27,7 +26,7 @@ dependencies {
 	compile 'org.ros.rosjava_messages:sensor_msgs:1.11.7'
 
  	// OpenCV
-	compile 'nu.pattern:opencv:2.4.9-5'  
+	compile 'nu.pattern:opencv:2.4.9-5'
 	compile files('./Imshow.jar')
 
 	compile 'org.apache.commons:commons-lang3:3.0'

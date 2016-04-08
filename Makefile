@@ -1,7 +1,9 @@
 run: 
-	@./gradlew installApp
+	@./gradlew run
+install:
+	@./gradlew installDist
 update:
-	@./gradlew installApp --refresh-dependencies
+	@./gradlew installDist --refresh-dependencies
 idea: 
 	@./gradlew idea
 clean: 
